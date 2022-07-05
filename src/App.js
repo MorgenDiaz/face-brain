@@ -1,3 +1,4 @@
+import { Component } from "react";
 import "./App.css";
 import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
@@ -88,23 +89,42 @@ const particleOptions = {
   particles: particleSettings,
   detectRetina: true,
 };
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      input: "",
+    };
+  }
+  onInputChange = (event) => {
+    console.log(event.target.value);
+    this.setState({ input: event.target.value });
+  };
 
-function App() {
-  return (
-    <div className="App">
-      <Particles
-        className="Particles"
-        id="tsparticles"
-        init={particlesInit}
-        loaded={particlesLoaded}
-        options={particleOptions}
-      />
-      <Navigation />
-      <Logo />
-      <Rank />
-      <ImageLinkForm />
-    </div>
-  );
+  onSubmit = (event) => {
+    console.log(`User submitted ${this.input}`);
+  };
+
+  render() {
+    return (
+      <div className="App">
+        <Particles
+          className="Particles"
+          id="tsparticles"
+          init={particlesInit}
+          loaded={particlesLoaded}
+          options={particleOptions}
+        />
+        <Navigation />
+        <Logo />
+        <Rank />
+        <ImageLinkForm
+          onInputChange={this.onInputChange}
+          onSubmit={this.onSubmit}
+        />
+      </div>
+    );
+  }
 }
 
 export default App;
