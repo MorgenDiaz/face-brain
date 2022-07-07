@@ -2,10 +2,11 @@ import { Component } from "react";
 import "./App.css";
 import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
-import Logo from "./components/Logo/Logo";
+import Logo from "./components/logo/Logo";
 import Navigation from "./components/navigation/Navigation";
-import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
-import Rank from "./components/Rank/Rank";
+import ImageLinkForm from "./components/imageLinkForm/ImageLinkForm";
+import Rank from "./components/rank/Rank";
+import FaceRecognition from "./components/faceRecognition/FaceRecognition";
 
 const particlesInit = async (main) => {
   console.log(main);
@@ -94,6 +95,7 @@ class App extends Component {
     super();
     this.state = {
       input: "",
+      imageUrl: "",
     };
   }
   onInputChange = (event) => {
@@ -102,7 +104,9 @@ class App extends Component {
   };
 
   onSubmit = (event) => {
-    console.log(`User submitted ${this.input}`);
+    const dummyImageSubmission =
+      "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/1200px-SpongeBob_SquarePants_character.svg.png";
+    this.setState({ imageUrl: dummyImageSubmission });
   };
 
   render() {
@@ -122,6 +126,7 @@ class App extends Component {
           onInputChange={this.onInputChange}
           onSubmit={this.onSubmit}
         />
+        <FaceRecognition imageUrl={this.state.imageUrl} />
       </div>
     );
   }

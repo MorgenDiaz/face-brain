@@ -3,10 +3,6 @@ import "./ImageLinkForm.css";
 import "tachyons";
 
 class ImageLinkForm extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { onInputChange, onSubmit } = this.props;
 
