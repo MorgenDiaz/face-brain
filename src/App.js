@@ -7,6 +7,11 @@ import Navigation from "./components/navigation/Navigation";
 import ImageLinkForm from "./components/imageLinkForm/ImageLinkForm";
 import Rank from "./components/rank/Rank";
 import FaceRecognition from "./components/faceRecognition/FaceRecognition";
+import Clarifai from "clarifai";
+
+const app = new Clarifai.App({
+  apiKey: "f460d892804d402faca1e6798679e4f1",
+});
 
 const particlesInit = async (main) => {
   console.log(main);
@@ -96,17 +101,47 @@ class App extends Component {
     this.state = {
       input: "",
       imageUrl: "",
+      box: {},
     };
   }
+
+  calculateFaceLocation = (respData) => {
+    const clarifaiFace =
+      respData.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById("input_image");
+    const width = Number(image.width);
+    const height = Number(image.height);
+
+    return {
+      leftCol: clarifaiFace.left_col * width,
+      topRow: clarifaiFace.top_row * height,
+      rightCol: width - clarifaiFace.right_col * width,
+      bottomRow: height - clarifaiFace.bottom_row * height,
+    };
+  };
+
+  displayFaceBox = (box) => {
+    this.setState({ box: box });
+  };
+
   onInputChange = (event) => {
-    console.log(event.target.value);
     this.setState({ input: event.target.value });
   };
 
   onSubmit = (event) => {
     const dummyImageSubmission =
       "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/1200px-SpongeBob_SquarePants_character.svg.png";
-    this.setState({ imageUrl: dummyImageSubmission });
+    this.setState({ imageUrl: this.state.input });
+
+    app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input).then(
+      (response) => {
+        let faceBox = this.calculateFaceLocation(response);
+        this.displayFaceBox(faceBox);
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
   };
 
   render() {
@@ -126,7 +161,7 @@ class App extends Component {
           onInputChange={this.onInputChange}
           onSubmit={this.onSubmit}
         />
-        <FaceRecognition imageUrl={this.state.imageUrl} />
+        <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box} />
       </div>
     );
   }
