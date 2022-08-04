@@ -4,6 +4,7 @@ import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
 import Logo from "./components/logo/Logo";
 import Navigation from "./components/navigation/Navigation";
+import Signin from "./components/signin/signin";
 import ImageLinkForm from "./components/imageLinkForm/ImageLinkForm";
 import Rank from "./components/rank/Rank";
 import FaceRecognition from "./components/faceRecognition/FaceRecognition";
@@ -99,6 +100,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
+      route: "signin",
       input: "",
       imageUrl: "",
       box: {},
@@ -122,6 +124,10 @@ class App extends Component {
 
   displayFaceBox = (box) => {
     this.setState({ box: box });
+  };
+
+  onRouteChanged = (route) => {
+    this.setState({ route: route });
   };
 
   onInputChange = (event) => {
@@ -154,14 +160,23 @@ class App extends Component {
           loaded={particlesLoaded}
           options={particleOptions}
         />
-        <Navigation />
-        <Logo />
-        <Rank />
-        <ImageLinkForm
-          onInputChange={this.onInputChange}
-          onSubmit={this.onSubmit}
-        />
-        <FaceRecognition imageUrl={this.state.imageUrl} box={this.state.box} />
+        <Navigation onRouteChange={this.onRouteChanged} />
+        {this.state.route === `signin` ? (
+          <Signin onRouteChange={this.onRouteChanged} />
+        ) : (
+          <div>
+            <Logo />
+            <Rank />
+            <ImageLinkForm
+              onInputChange={this.onInputChange}
+              onSubmit={this.onSubmit}
+            />
+            <FaceRecognition
+              imageUrl={this.state.imageUrl}
+              box={this.state.box}
+            />
+          </div>
+        )}
       </div>
     );
   }
