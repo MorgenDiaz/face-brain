@@ -5,6 +5,7 @@ import { loadFull } from "tsparticles";
 import Logo from "./components/logo/Logo";
 import Navigation from "./components/navigation/Navigation";
 import Signin from "./components/signin/signin";
+import Register from "./components/register/register";
 import ImageLinkForm from "./components/imageLinkForm/ImageLinkForm";
 import Rank from "./components/rank/Rank";
 import FaceRecognition from "./components/faceRecognition/FaceRecognition";
@@ -101,6 +102,7 @@ class App extends Component {
     super();
     this.state = {
       route: "signin",
+      isSignedIn: false,
       input: "",
       imageUrl: "",
       box: {},
@@ -127,6 +129,11 @@ class App extends Component {
   };
 
   onRouteChanged = (route) => {
+    if (route === "home") {
+      this.setState({ isSignedIn: true });
+    } else {
+      this.setState({ isSignedIn: false });
+    }
     this.setState({ route: route });
   };
 
@@ -150,20 +157,10 @@ class App extends Component {
     );
   };
 
-  render() {
-    return (
-      <div className="App">
-        <Particles
-          className="Particles"
-          id="tsparticles"
-          init={particlesInit}
-          loaded={particlesLoaded}
-          options={particleOptions}
-        />
-        <Navigation onRouteChange={this.onRouteChanged} />
-        {this.state.route === `signin` ? (
-          <Signin onRouteChange={this.onRouteChanged} />
-        ) : (
+  getCurrentComponentForRoute() {
+    switch (this.state.route) {
+      case "home":
+        return (
           <div>
             <Logo />
             <Rank />
@@ -176,7 +173,31 @@ class App extends Component {
               box={this.state.box}
             />
           </div>
-        )}
+        );
+      case "signin":
+        return <Signin onRouteChange={this.onRouteChanged} />;
+      case "register":
+        return <Register onRouteChange={this.onRouteChanged}></Register>;
+      default:
+        return undefined;
+    }
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <Particles
+          className="Particles"
+          id="tsparticles"
+          init={particlesInit}
+          loaded={particlesLoaded}
+          options={particleOptions}
+        />
+        <Navigation
+          onRouteChange={this.onRouteChanged}
+          isSignedIn={this.state.isSignedIn}
+        />
+        {this.getCurrentComponentForRoute()}
       </div>
     );
   }
