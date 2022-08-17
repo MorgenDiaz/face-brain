@@ -9,11 +9,6 @@ import Register from "./components/register/register";
 import ImageLinkForm from "./components/imageLinkForm/ImageLinkForm";
 import Rank from "./components/rank/Rank";
 import FaceRecognition from "./components/faceRecognition/FaceRecognition";
-import Clarifai from "clarifai";
-
-const app = new Clarifai.App({
-  apiKey: "f460d892804d402faca1e6798679e4f1",
-});
 
 const particlesInit = async (main) => {
   console.log(main);
@@ -97,16 +92,26 @@ const particleOptions = {
   particles: particleSettings,
   detectRetina: true,
 };
+
+const initialState = {
+  route: "signin",
+  isSignedIn: false,
+  input: "",
+  imageUrl: "",
+  box: {},
+  user: {
+    id: 0,
+    name: "",
+    email: "",
+    password: "",
+    entries: 0,
+  },
+};
+
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      route: "signin",
-      isSignedIn: false,
-      input: "",
-      imageUrl: "",
-      box: {},
-    };
+    this.state = initialState;
   }
 
   calculateFaceLocation = (respData) => {
@@ -128,11 +133,23 @@ class App extends Component {
     this.setState({ box: box });
   };
 
+  loadUser = (data) => {
+    this.setState({
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        entries: data.entries,
+      },
+    });
+  };
+
   onRouteChanged = (route) => {
     if (route === "home") {
       this.setState({ isSignedIn: true });
     } else {
-      this.setState({ isSignedIn: false });
+      this.setState(initialState);
     }
     this.setState({ route: route });
   };
@@ -141,29 +158,55 @@ class App extends Component {
     this.setState({ input: event.target.value });
   };
 
-  onSubmit = (event) => {
+  onSubmit = async (event) => {
     const dummyImageSubmission =
       "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/1200px-SpongeBob_SquarePants_character.svg.png";
     this.setState({ imageUrl: this.state.input });
 
-    app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input).then(
-      (response) => {
-        let faceBox = this.calculateFaceLocation(response);
-        this.displayFaceBox(faceBox);
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
+    try {
+      let options = {
+        method: "Post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input: this.state.input }),
+      };
+
+      let apiResponse = await fetch(
+        "http://localhost:3030/imagefacedetect",
+        options
+      );
+
+      const faceDetectResponse = await apiResponse.json();
+
+      let faceBox = this.calculateFaceLocation(faceDetectResponse);
+      this.displayFaceBox(faceBox);
+
+      options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: this.state.user.id }),
+      };
+
+      apiResponse = await fetch("http://localhost:3030/image", options);
+      const entries = await apiResponse.json();
+
+      this.setState(Object.assign(this.state.user, { entries: entries }));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   getCurrentComponentForRoute() {
+    const user = this.state.user;
     switch (this.state.route) {
       case "home":
         return (
           <div>
             <Logo />
-            <Rank />
+            <Rank name={user.name} rank={user.entries} />
             <ImageLinkForm
               onInputChange={this.onInputChange}
               onSubmit={this.onSubmit}
@@ -175,9 +218,19 @@ class App extends Component {
           </div>
         );
       case "signin":
-        return <Signin onRouteChange={this.onRouteChanged} />;
+        return (
+          <Signin
+            loadUser={this.loadUser}
+            onRouteChange={this.onRouteChanged}
+          />
+        );
       case "register":
-        return <Register onRouteChange={this.onRouteChanged}></Register>;
+        return (
+          <Register
+            loadUser={this.loadUser}
+            onRouteChange={this.onRouteChanged}
+          ></Register>
+        );
       default:
         return undefined;
     }

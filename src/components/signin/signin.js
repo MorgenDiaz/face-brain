@@ -1,6 +1,45 @@
 import { Component } from "react";
 
 class Signin extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loginEmail: "",
+      loginPassword: "",
+    };
+  }
+
+  onEmailChanged = (event) => {
+    this.setState({ loginEmail: event.target.value });
+  };
+
+  onPasswordChanged = (event) => {
+    this.setState({ loginPassword: event.target.value });
+  };
+
+  onSigninClicked = async (event) => {
+    event.preventDefault();
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: this.state.loginEmail,
+        password: this.state.loginPassword,
+      }),
+    };
+
+    const response = await fetch("http://localhost:3030/signin", options);
+    const user = await response.json();
+
+    if (user.id) {
+      this.props.loadUser(user);
+      this.props.onRouteChange(`home`);
+    }
+  };
+
   render() {
     const { onRouteChange } = this.props;
 
@@ -18,6 +57,7 @@ class Signin extends Component {
                 type="email"
                 name="email-address"
                 id="email-address"
+                onChange={this.onEmailChanged}
               />
             </div>
             <div className="mv3">
@@ -29,6 +69,7 @@ class Signin extends Component {
                 type="password"
                 name="password"
                 id="password"
+                onChange={this.onPasswordChanged}
               />
             </div>
           </fieldset>
@@ -37,7 +78,7 @@ class Signin extends Component {
               className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
               type="submit"
               value="Sign in"
-              onClick={() => onRouteChange(`home`)}
+              onClick={this.onSigninClicked}
             />
           </div>
           <div className="lh-copy mt3">
