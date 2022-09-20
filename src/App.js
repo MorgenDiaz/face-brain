@@ -173,7 +173,7 @@ class App extends Component {
       };
 
       let apiResponse = await fetch(
-        "http://localhost:3030/imagefacedetect",
+        "https://serene-scrubland-95553.herokuapp.com/imagefacedetect",
         options
       );
 
@@ -190,7 +190,10 @@ class App extends Component {
         body: JSON.stringify({ id: this.state.user.id }),
       };
 
-      apiResponse = await fetch("http://localhost:3030/image", options);
+      apiResponse = await fetch(
+        "https://serene-scrubland-95553.herokuapp.com/image",
+        options
+      );
       const entries = await apiResponse.json();
 
       this.setState(Object.assign(this.state.user, { entries: entries }));

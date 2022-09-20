@@ -37,7 +37,10 @@ class Register extends Component {
       }),
     };
 
-    const response = await fetch("http://localhost:3030/register", options);
+    const response = await fetch(
+      "https://serene-scrubland-95553.herokuapp.com/register",
+      options
+    );
     const user = await response.json();
     if (user.id) {
       this.props.loadUser(user);

@@ -31,7 +31,10 @@ class Signin extends Component {
       }),
     };
 
-    const response = await fetch("http://localhost:3030/signin", options);
+    const response = await fetch(
+      "https://serene-scrubland-95553.herokuapp.com/signin",
+      options
+    );
     const user = await response.json();
 
     if (user.id) {
